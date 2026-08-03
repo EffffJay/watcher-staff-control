@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Watcher Staff Control</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 40px;
+    }
+    button {
+      display: block;
+      width: 80%;
+      max-width: 320px;
+      margin: 12px auto;
+      padding: 18px;
+      font-size: 20px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    #connectBtn { background: #444; }
+    #calmBtn { background: #2a7fd6; }
+    #wrathBtn { background: #c62828; }
+    #divinityBtn { background: #b8860b; }
+    #offBtn { background: #555; }
+    #status { margin-top: 20px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h2>Watcher Staff</h2>
+  <button id="connectBtn" onclick="connect()">Connect</button>
+  <button id="calmBtn" onclick="sendCommand('1')">Calm</button>
+  <button id="wrathBtn" onclick="sendCommand('2')">Wrath</button>
+  <button id="divinityBtn" onclick="sendCommand('3')">Divinity</button>
+  <button id="offBtn" onclick="sendCommand('0')">Off</button>
+  <div id="status">Not connected</div>
+
+<script>
+const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const CHARACTERISTIC_UUID_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+
+let rxCharacteristic = null;
+
+async function connect() {
+  try {
+    document.getElementById('status').innerText = 'Requesting device...';
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'WatcherStaff' }],
+      optionalServices: [SERVICE_UUID]
+    });
+
+    document.getElementById('status').innerText = 'Connecting...';
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
+
+    document.getElementById('status').innerText = 'Connected to ' + device.name;
+  } catch (error) {
+    document.getElementById('status').innerText = 'Connection failed: ' + error;
+  }
+}
+
+async function sendCommand(cmd) {
+  if (!rxCharacteristic) {
+    document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
+    return;
+  }
+  try {
+    const encoder = new TextEncoder();
+    await rxCharacteristic.writeValue(encoder.encode(cmd));
+    document.getElementById('status').innerText = 'Sent command: ' + cmd;
+  } catch (error) {
+    document.getElementById('status').innerText = 'Send failed: ' + error;
+  }
+}
+</script>
+</body>
+</html>
