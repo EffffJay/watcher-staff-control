@@ -26,18 +26,133 @@
     #connectBtn { background: #444; }
     #calmBtn { background: #2a7fd6; }
     #wrathBtn { background: #c62828; }
-    #divinityBtn { background: #8F17E8; }
+    #divinityBtn { background: #9700CF; }
     #offBtn { background: #555; }
     #status { margin-top: 20px; color: #aaa; }
+
+    .stanceButtons {
+      width: 100%;
+    }
+
+    .panel {
+      width: 80%;
+      max-width: 320px;
+      margin: 22px auto;
+      padding: 16px;
+      background: #1c1c1c;
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      text-align: left;
+      color: #ccc;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 45px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h2>Watcher Staff</h2>
+
   <button id="connectBtn" onclick="connect()">Connect</button>
-  <button id="calmBtn" onclick="sendCommand('1')">Calm</button>
-  <button id="wrathBtn" onclick="sendCommand('2')">Wrath</button>
-  <button id="divinityBtn" onclick="sendCommand('3')">Divinity</button>
-  <button id="offBtn" onclick="sendCommand('0')">Off</button>
+
+  <div class="stanceButtons">
+    <button id="calmBtn" onclick="sendCommand('1')">Calm</button>
+    <button id="wrathBtn" onclick="sendCommand('2')">Wrath</button>
+    <button id="divinityBtn" onclick="sendCommand('3')">Divinity</button>
+    <button id="offBtn" onclick="sendCommand('0')">Off</button>
+  </div>
+
+  <div class="panel">
+    <h3>General</h3>
+
+    <label>Brightness <span id="brightnessValue">128</span></label>
+    <input type="range" min="0" max="255" value="128"
+           oninput="updateValue('brightnessValue', this.value)"
+           onchange="sendCommand('B' + this.value)">
+
+    <label>Animation Speed <span id="speedValue">100</span></label>
+    <input type="range" min="1" max="255" value="100"
+           oninput="updateValue('speedValue', this.value)"
+           onchange="sendCommand('P' + this.value)">
+  </div>
+
+  <div class="panel">
+    <h3>Calm</h3>
+
+    <label>Calm Color</label>
+    <input type="color" id="calmColor" value="#ffffff"
+           onchange="sendRGB('R', this.value)">
+
+    <label>Closed Bias <span id="calm1Value">50</span></label>
+    <input type="range" min="0" max="255" value="50"
+           oninput="updateValue('calm1Value', this.value)"
+           onchange="sendCommand('C1' + this.value)">
+
+    <label>Reveal Band <span id="calm2Value">50</span></label>
+    <input type="range" min="0" max="255" value="50"
+           oninput="updateValue('calm2Value', this.value)"
+           onchange="sendCommand('C2' + this.value)">
+  </div>
+
+  <div class="panel">
+    <h3>Wrath</h3>
+
+    <label>Wrath Color</label>
+    <input type="color" id="wrathColor" value="#ff0000"
+           onchange="sendRGB('R', this.value)">
+
+    <label>Whiteness <span id="wrath1Value">128</span></label>
+    <input type="range" min="0" max="255" value="128"
+           oninput="updateValue('wrath1Value', this.value)"
+           onchange="sendCommand('W1' + this.value)">
+
+    <label>Crackle <span id="wrath2Value">128</span></label>
+    <input type="range" min="0" max="255" value="128"
+           oninput="updateValue('wrath2Value', this.value)"
+           onchange="sendCommand('W2' + this.value)">
+  </div>
+
+  <div class="panel">
+    <h3>Divinity</h3>
+
+    <label>Divinity Color</label>
+    <input type="color" id="divinityColor" value="#8000ff"
+           onchange="sendRGB('R', this.value)">
+
+    <label>Orb Radius <span id="div1Value">5</span></label>
+    <input type="range" min="1" max="20" value="5"
+           oninput="updateValue('div1Value', this.value)"
+           onchange="sendCommand('D1' + this.value)">
+
+    <label>Speed Variation <span id="div2Value">128</span></label>
+    <input type="range" min="0" max="255" value="128"
+           oninput="updateValue('div2Value', this.value)"
+           onchange="sendCommand('D2' + this.value)">
+
+    <label>Vertical Range <span id="div3Value">40</span></label>
+    <input type="range" min="0" max="40" value="40"
+           oninput="updateValue('div3Value', this.value)"
+           onchange="sendCommand('D3' + this.value)">
+  </div>
+
   <div id="status">Not connected</div>
 
 <script>
@@ -49,35 +164,63 @@ let rxCharacteristic = null;
 async function connect() {
   try {
     document.getElementById('status').innerText = 'Requesting device...';
+
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'WatcherStaff' }],
       optionalServices: [SERVICE_UUID]
     });
 
     document.getElementById('status').innerText = 'Connecting...';
+
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
     rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
 
-    document.getElementById('status').innerText = 'Connected to ' + device.name;
+    document.getElementById('status').innerText =
+      'Connected to ' + (device.name || 'WatcherStaff');
   } catch (error) {
-    document.getElementById('status').innerText = 'Connection failed: ' + error;
+    document.getElementById('status').innerText =
+      'Connection failed: ' + error;
   }
 }
 
 async function sendCommand(cmd) {
   if (!rxCharacteristic) {
-    document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
+    document.getElementById('status').innerText =
+      'Not connected yet - tap Connect first';
     return;
   }
+
   try {
     const encoder = new TextEncoder();
-    await rxCharacteristic.writeValue(encoder.encode(cmd));
-    document.getElementById('status').innerText = 'Sent command: ' + cmd;
+    await rxCharacteristic.writeValue(encoder.encode(String(cmd)));
+
+    document.getElementById('status').innerText =
+      'Sent command: ' + cmd;
   } catch (error) {
-    document.getElementById('status').innerText = 'Send failed: ' + error;
+    document.getElementById('status').innerText =
+      'Send failed: ' + error;
   }
+}
+
+function updateValue(id, value) {
+  document.getElementById(id).innerText = value;
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return {
+    r: parseInt(hex.substring(0, 2), 16),
+    g: parseInt(hex.substring(2, 4), 16),
+    b: parseInt(hex.substring(4, 6), 16)
+  };
+}
+
+function sendRGB(prefix, hex) {
+  const rgb = hexToRgb(hex);
+  sendCommand(prefix + rgb.r + ',' + rgb.g + ',' + rgb.b);
 }
 </script>
 </body>
+
 </html>
