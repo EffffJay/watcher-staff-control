@@ -9,15 +9,15 @@
       color: #eee;
       font-family: sans-serif;
       text-align: center;
-      padding-top: 40px;
+      padding: 20px 10px 60px;
     }
     button {
       display: block;
       width: 80%;
       max-width: 320px;
-      margin: 12px auto;
-      padding: 18px;
-      font-size: 20px;
+      margin: 10px auto;
+      padding: 16px;
+      font-size: 19px;
       border-radius: 10px;
       border: none;
       color: white;
@@ -28,199 +28,233 @@
     #wrathBtn { background: #c62828; }
     #divinityBtn { background: #9700CF; }
     #offBtn { background: #555; }
-    #status { margin-top: 20px; color: #aaa; }
+    #status { margin-top: 14px; color: #aaa; font-size: 14px; }
 
-    .stanceButtons {
-      width: 100%;
+    #devToggle {
+      background: #2e2e2e;
+      color: #9c9;
+      font-size: 14px;
+      padding: 10px 16px;
+      width: auto;
+      display: inline-block;
     }
-
-    .panel {
-      width: 80%;
-      max-width: 320px;
-      margin: 22px auto;
-      padding: 16px;
-      background: #1c1c1c;
+    #devPanel {
+      display: none;
+      max-width: 340px;
+      margin: 20px auto 0;
+      background: #161616;
       border-radius: 12px;
-      box-sizing: border-box;
-    }
-
-    h3 {
-      margin-top: 0;
-    }
-
-    label {
-      display: block;
-      margin: 16px 0 6px;
+      padding: 18px 20px;
       text-align: left;
-      color: #ccc;
     }
-
-    input[type="range"] {
-      width: 100%;
+    #devPanel.open { display: block; }
+    .devSection {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #262626;
     }
-
-    input[type="color"] {
+    .devSection:last-child { border-bottom: none; margin-bottom: 0; }
+    .devLabel {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .row { margin-bottom: 12px; }
+    .row label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #bbb;
+      margin-bottom: 3px;
+    }
+    input[type=range] { width: 100%; }
+    input[type=color] {
       width: 100%;
-      height: 45px;
+      height: 34px;
       border: none;
-      background: transparent;
-      cursor: pointer;
+      border-radius: 6px;
+      background: none;
+      margin-bottom: 4px;
+    }
+    #stanceParams .hint {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
   <h2>Watcher Staff</h2>
-
   <button id="connectBtn" onclick="connect()">Connect</button>
-
-  <div class="stanceButtons">
-    <button id="calmBtn" onclick="sendCommand('1')">Calm</button>
-    <button id="wrathBtn" onclick="sendCommand('2')">Wrath</button>
-    <button id="divinityBtn" onclick="sendCommand('3')">Divinity</button>
-    <button id="offBtn" onclick="sendCommand('0')">Off</button>
-  </div>
-
-  <div class="panel">
-    <h3>General</h3>
-
-    <label>Brightness <span id="brightnessValue">128</span></label>
-    <input type="range" min="0" max="255" value="128"
-           oninput="updateValue('brightnessValue', this.value)"
-           onchange="sendCommand('B' + this.value)">
-
-    <label>Animation Speed <span id="speedValue">100</span></label>
-    <input type="range" min="1" max="255" value="100"
-           oninput="updateValue('speedValue', this.value)"
-           onchange="sendCommand('P' + this.value)">
-  </div>
-
-  <div class="panel">
-    <h3>Calm</h3>
-
-    <label>Calm Color</label>
-    <input type="color" id="calmColor" value="#ffffff"
-           onchange="sendRGB('R', this.value)">
-
-    <label>Closed Bias <span id="calm1Value">50</span></label>
-    <input type="range" min="0" max="255" value="50"
-           oninput="updateValue('calm1Value', this.value)"
-           onchange="sendCommand('C1' + this.value)">
-
-    <label>Reveal Band <span id="calm2Value">50</span></label>
-    <input type="range" min="0" max="255" value="50"
-           oninput="updateValue('calm2Value', this.value)"
-           onchange="sendCommand('C2' + this.value)">
-  </div>
-
-  <div class="panel">
-    <h3>Wrath</h3>
-
-    <label>Wrath Color</label>
-    <input type="color" id="wrathColor" value="#ff0000"
-           onchange="sendRGB('R', this.value)">
-
-    <label>Whiteness <span id="wrath1Value">128</span></label>
-    <input type="range" min="0" max="255" value="128"
-           oninput="updateValue('wrath1Value', this.value)"
-           onchange="sendCommand('W1' + this.value)">
-
-    <label>Crackle <span id="wrath2Value">128</span></label>
-    <input type="range" min="0" max="255" value="128"
-           oninput="updateValue('wrath2Value', this.value)"
-           onchange="sendCommand('W2' + this.value)">
-  </div>
-
-  <div class="panel">
-    <h3>Divinity</h3>
-
-    <label>Divinity Color</label>
-    <input type="color" id="divinityColor" value="#8000ff"
-           onchange="sendRGB('R', this.value)">
-
-    <label>Orb Radius <span id="div1Value">5</span></label>
-    <input type="range" min="1" max="20" value="5"
-           oninput="updateValue('div1Value', this.value)"
-           onchange="sendCommand('D1' + this.value)">
-
-    <label>Speed Variation <span id="div2Value">128</span></label>
-    <input type="range" min="0" max="255" value="128"
-           oninput="updateValue('div2Value', this.value)"
-           onchange="sendCommand('D2' + this.value)">
-
-    <label>Vertical Range <span id="div3Value">40</span></label>
-    <input type="range" min="0" max="40" value="40"
-           oninput="updateValue('div3Value', this.value)"
-           onchange="sendCommand('D3' + this.value)">
-  </div>
-
+  <button id="calmBtn" onclick="selectStance('1','calm')">Calm</button>
+  <button id="wrathBtn" onclick="selectStance('2','wrath')">Wrath</button>
+  <button id="divinityBtn" onclick="selectStance('3','divinity')">Divinity</button>
+  <button id="offBtn" onclick="sendCommand('0')">Off</button>
   <div id="status">Not connected</div>
+
+  <button id="devToggle" onclick="toggleDev()">Dev Mode: Off</button>
+
+  <div id="devPanel">
+    <div class="devSection">
+      <div class="devLabel">Global</div>
+      <div class="row">
+        <label><span>Brightness</span><span id="brightVal">90</span></label>
+        <input type="range" id="brightness" min="10" max="255" value="90" oninput="onBrightness(this.value)">
+      </div>
+      <div class="row">
+        <label><span>Speed</span><span id="speedVal">1.0x</span></label>
+        <input type="range" id="speed" min="10" max="300" value="100" oninput="onSpeed(this.value)">
+      </div>
+      <div class="row">
+        <label><span>Color (applies to editing stance)</span><span></span></label>
+        <input type="color" id="colorPick" value="#2ac8dc" oninput="onColor(this.value)">
+      </div>
+    </div>
+
+    <div class="devSection" id="stanceParams">
+      <div class="devLabel">Editing: <span id="editingLabel">Calm</span></div>
+      <div class="hint">Selecting a stance button above also selects it here.</div>
+      <div id="calmParams">
+        <div class="row">
+          <label><span>Closed Bias (sleepiness)</span><span id="c1Val">55</span></label>
+          <input type="range" id="c1" min="0" max="100" value="55" oninput="onParam('C1', this.value, 'c1Val')">
+        </div>
+        <div class="row">
+          <label><span>Eyelid Edge Softness</span><span id="c2Val">28</span></label>
+          <input type="range" id="c2" min="10" max="50" value="28" oninput="onParam('C2', this.value, 'c2Val')">
+        </div>
+      </div>
+      <div id="wrathParams" style="display:none;">
+        <div class="row">
+          <label><span>Center Whiteness</span><span id="w1Val">100</span></label>
+          <input type="range" id="w1" min="0" max="200" value="100" oninput="onParam('W1', this.value, 'w1Val')">
+        </div>
+        <div class="row">
+          <label><span>Crackle Intensity (min flicker)</span><span id="w2Val">30</span></label>
+          <input type="range" id="w2" min="0" max="255" value="30" oninput="onParam('W2', this.value, 'w2Val')">
+        </div>
+      </div>
+      <div id="divinityParams" style="display:none;">
+        <div class="row">
+          <label><span>Orb Radius</span><span id="d1Val">11.0</span></label>
+          <input type="range" id="d1" min="50" max="300" value="110" oninput="onOrbRadius(this.value)">
+        </div>
+        <div class="row">
+          <label><span>Orb Speed</span><span id="d2Val">4.0</span></label>
+          <input type="range" id="d2" min="5" max="80" value="40" oninput="onOrbSpeed(this.value)">
+        </div>
+        <div class="row">
+          <label><span>Vertical Dart Range</span><span id="d3Val">80</span></label>
+          <input type="range" id="d3" min="20" max="80" value="80" oninput="onParam('D3', this.value, 'd3Val')">
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
 const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const CHARACTERISTIC_UUID_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
 let rxCharacteristic = null;
+let editingStance = 'calm';
+let lastSendTime = 0;
+const SEND_THROTTLE_MS = 120;
 
 async function connect() {
   try {
     document.getElementById('status').innerText = 'Requesting device...';
-
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ name: 'WatcherStaff' }],
       optionalServices: [SERVICE_UUID]
     });
 
     document.getElementById('status').innerText = 'Connecting...';
-
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
     rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
 
-    document.getElementById('status').innerText =
-      'Connected to ' + (device.name || 'WatcherStaff');
+    document.getElementById('status').innerText = 'Connected to ' + device.name;
   } catch (error) {
-    document.getElementById('status').innerText =
-      'Connection failed: ' + error;
+    document.getElementById('status').innerText = 'Connection failed: ' + error;
   }
 }
 
 async function sendCommand(cmd) {
   if (!rxCharacteristic) {
-    document.getElementById('status').innerText =
-      'Not connected yet - tap Connect first';
+    document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
     return;
   }
-
   try {
     const encoder = new TextEncoder();
-    await rxCharacteristic.writeValue(encoder.encode(String(cmd)));
-
-    document.getElementById('status').innerText =
-      'Sent command: ' + cmd;
+    await rxCharacteristic.writeValue(encoder.encode(cmd));
   } catch (error) {
-    document.getElementById('status').innerText =
-      'Send failed: ' + error;
+    document.getElementById('status').innerText = 'Send failed: ' + error;
   }
 }
 
-function updateValue(id, value) {
-  document.getElementById(id).innerText = value;
+function throttledSend(cmd) {
+  const now = Date.now();
+  if (now - lastSendTime < SEND_THROTTLE_MS) return;
+  lastSendTime = now;
+  sendCommand(cmd);
 }
 
-function hexToRgb(hex) {
-  hex = hex.replace('#', '');
-  return {
-    r: parseInt(hex.substring(0, 2), 16),
-    g: parseInt(hex.substring(2, 4), 16),
-    b: parseInt(hex.substring(4, 6), 16)
+function selectStance(cmd, name) {
+  sendCommand(cmd);
+  editingStance = name;
+  document.getElementById('editingLabel').innerText = name.charAt(0).toUpperCase() + name.slice(1);
+  document.getElementById('calmParams').style.display = name === 'calm' ? 'block' : 'none';
+  document.getElementById('wrathParams').style.display = name === 'wrath' ? 'block' : 'none';
+  document.getElementById('divinityParams').style.display = name === 'divinity' ? 'block' : 'none';
+
+  const defaults = {
+    calm: '#28c8dc',
+    wrath: '#ff3232',
+    divinity: '#e63cc8'
   };
+  document.getElementById('colorPick').value = defaults[name];
 }
 
-function sendRGB(prefix, hex) {
-  const rgb = hexToRgb(hex);
-  sendCommand(prefix + rgb.r + ',' + rgb.g + ',' + rgb.b);
+function toggleDev() {
+  const panel = document.getElementById('devPanel');
+  const btn = document.getElementById('devToggle');
+  panel.classList.toggle('open');
+  btn.innerText = panel.classList.contains('open') ? 'Dev Mode: On' : 'Dev Mode: Off';
+}
+
+function onBrightness(val) {
+  document.getElementById('brightVal').innerText = val;
+  throttledSend('B' + val);
+}
+
+function onSpeed(val) {
+  document.getElementById('speedVal').innerText = (val / 100).toFixed(1) + 'x';
+  throttledSend('P' + val);
+}
+
+function onColor(hex) {
+  const r = parseInt(hex.substring(1, 3), 16);
+  const g = parseInt(hex.substring(3, 5), 16);
+  const b = parseInt(hex.substring(5, 7), 16);
+  throttledSend('R' + r + ',' + g + ',' + b);
+}
+
+function onParam(prefix, val, labelId) {
+  document.getElementById(labelId).innerText = val;
+  throttledSend(prefix + val);
+}
+
+function onOrbRadius(val) {
+  document.getElementById('d1Val').innerText = (val / 10).toFixed(1);
+  throttledSend('D1' + val);
+}
+
+function onOrbSpeed(val) {
+  document.getElementById('d2Val').innerText = (val / 10).toFixed(1);
+  throttledSend('D2' + val);
 }
 </script>
 </body>
-
 </html>
