@@ -183,10 +183,12 @@ async function connect() {
     rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
 
     document.getElementById('status').innerText = 'Connected to ' + device.name;
+    console.log(`[BLE] connected to ${device.name} at ${new Date().toISOString()}`);
     writeQueue = Promise.resolve();
     writeFailureCount = 0;
     startHeartbeat();
   } catch (error) {
+    console.warn('[BLE] connect() failed:', error);
     document.getElementById('status').innerText = 'Connection failed: ' + error;
   }
 }
@@ -195,6 +197,7 @@ function onDeviceDisconnected() {
   // Fires on a clean disconnect (board reset, out of range, etc). The
   // heartbeat below is the backstop for when this event never fires at
   // all, which is common on page refresh/close.
+  console.warn(`[BLE] gattserverdisconnected event fired at ${new Date().toISOString()}`);
   rxCharacteristic = null;
   stopHeartbeat();
   document.getElementById('status').innerText = 'Disconnected';
@@ -203,7 +206,12 @@ function onDeviceDisconnected() {
 function startHeartbeat() {
   stopHeartbeat();
   heartbeatTimer = setInterval(() => {
-    if (rxCharacteristic) sendCommand('H');
+    if (rxCharacteristic) {
+      console.log('[BLE] heartbeat tick');
+      sendCommand('H');
+    } else {
+      console.log('[BLE] heartbeat tick skipped - rxCharacteristic is null');
+    }
   }, HEARTBEAT_INTERVAL_MS);
 }
 
@@ -219,17 +227,22 @@ function disconnectCleanly() {
   // to completion (the page can be torn down mid-call), which is exactly
   // why the board also has its own heartbeat-timeout watchdog.
   if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
+    console.log('[BLE] disconnecting cleanly on unload/pagehide');
     bleDevice.gatt.disconnect();
   }
 }
 window.addEventListener('beforeunload', disconnectCleanly);
 window.addEventListener('pagehide', disconnectCleanly);
 
+let pendingWrites = 0;
+
 async function sendCommand(cmd) {
   if (!rxCharacteristic) {
     document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
     return;
   }
+  pendingWrites++;
+  console.log(`[BLE] enqueue "${cmd}" (queue depth now ${pendingWrites})`);
   // Chain onto a queue so writes never overlap. Web Bluetooth doesn't
   // support concurrent GATT operations on the same device - firing writes
   // back-to-back (e.g. while dragging a slider) commonly throws a "GATT
@@ -240,21 +253,29 @@ async function sendCommand(cmd) {
 }
 
 async function doWrite(cmd) {
+  const startedAt = performance.now();
   try {
     const encoder = new TextEncoder();
     await rxCharacteristic.writeValue(encoder.encode(cmd));
+    const ms = (performance.now() - startedAt).toFixed(1);
+    console.log(`[BLE] sent "${cmd}" in ${ms}ms`);
     writeFailureCount = 0;
   } catch (error) {
+    const ms = (performance.now() - startedAt).toFixed(1);
     writeFailureCount++;
+    console.warn(`[BLE] FAILED "${cmd}" after ${ms}ms (failure #${writeFailureCount}): ${error}`);
     document.getElementById('status').innerText = 'Send failed: ' + error;
     // Only give up on the connection after repeated failures, or once the
     // device itself confirms it's actually gone - a single transient
     // error while dragging a slider shouldn't drop the connection.
     const stillConnected = bleDevice && bleDevice.gatt && bleDevice.gatt.connected;
     if (writeFailureCount >= 4 || !stillConnected) {
+      console.warn(`[BLE] giving up on connection (failures=${writeFailureCount}, stillConnected=${stillConnected})`);
       rxCharacteristic = null;
       stopHeartbeat();
     }
+  } finally {
+    pendingWrites--;
   }
 }
 
