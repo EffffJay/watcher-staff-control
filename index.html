@@ -162,6 +162,8 @@ let bleDevice = null;
 let heartbeatTimer = null;
 let editingStance = 'calm';
 let lastSendTime = 0;
+let writeQueue = Promise.resolve();
+let writeFailureCount = 0;
 const SEND_THROTTLE_MS = 120;
 const HEARTBEAT_INTERVAL_MS = 5000;
 
@@ -181,6 +183,8 @@ async function connect() {
     rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
 
     document.getElementById('status').innerText = 'Connected to ' + device.name;
+    writeQueue = Promise.resolve();
+    writeFailureCount = 0;
     startHeartbeat();
   } catch (error) {
     document.getElementById('status').innerText = 'Connection failed: ' + error;
@@ -226,13 +230,31 @@ async function sendCommand(cmd) {
     document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
     return;
   }
+  // Chain onto a queue so writes never overlap. Web Bluetooth doesn't
+  // support concurrent GATT operations on the same device - firing writes
+  // back-to-back (e.g. while dragging a slider) commonly throws a "GATT
+  // operation already in progress" error, which used to get treated as a
+  // real disconnect and killed the connection far too eagerly.
+  writeQueue = writeQueue.then(() => doWrite(cmd));
+  return writeQueue;
+}
+
+async function doWrite(cmd) {
   try {
     const encoder = new TextEncoder();
     await rxCharacteristic.writeValue(encoder.encode(cmd));
+    writeFailureCount = 0;
   } catch (error) {
+    writeFailureCount++;
     document.getElementById('status').innerText = 'Send failed: ' + error;
-    rxCharacteristic = null;
-    stopHeartbeat();
+    // Only give up on the connection after repeated failures, or once the
+    // device itself confirms it's actually gone - a single transient
+    // error while dragging a slider shouldn't drop the connection.
+    const stillConnected = bleDevice && bleDevice.gatt && bleDevice.gatt.connected;
+    if (writeFailureCount >= 4 || !stillConnected) {
+      rxCharacteristic = null;
+      stopHeartbeat();
+    }
   }
 }
 
