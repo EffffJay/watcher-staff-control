@@ -158,9 +158,12 @@ const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const CHARACTERISTIC_UUID_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 
 let rxCharacteristic = null;
+let bleDevice = null;
+let heartbeatTimer = null;
 let editingStance = 'calm';
 let lastSendTime = 0;
 const SEND_THROTTLE_MS = 120;
+const HEARTBEAT_INTERVAL_MS = 5000;
 
 async function connect() {
   try {
@@ -169,6 +172,8 @@ async function connect() {
       filters: [{ name: 'WatcherStaff' }],
       optionalServices: [SERVICE_UUID]
     });
+    bleDevice = device;
+    device.addEventListener('gattserverdisconnected', onDeviceDisconnected);
 
     document.getElementById('status').innerText = 'Connecting...';
     const server = await device.gatt.connect();
@@ -176,10 +181,45 @@ async function connect() {
     rxCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID_RX);
 
     document.getElementById('status').innerText = 'Connected to ' + device.name;
+    startHeartbeat();
   } catch (error) {
     document.getElementById('status').innerText = 'Connection failed: ' + error;
   }
 }
+
+function onDeviceDisconnected() {
+  // Fires on a clean disconnect (board reset, out of range, etc). The
+  // heartbeat below is the backstop for when this event never fires at
+  // all, which is common on page refresh/close.
+  rxCharacteristic = null;
+  stopHeartbeat();
+  document.getElementById('status').innerText = 'Disconnected';
+}
+
+function startHeartbeat() {
+  stopHeartbeat();
+  heartbeatTimer = setInterval(() => {
+    if (rxCharacteristic) sendCommand('H');
+  }, HEARTBEAT_INTERVAL_MS);
+}
+
+function stopHeartbeat() {
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+}
+
+function disconnectCleanly() {
+  // Best-effort clean disconnect on refresh/close. Not guaranteed to run
+  // to completion (the page can be torn down mid-call), which is exactly
+  // why the board also has its own heartbeat-timeout watchdog.
+  if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
+    bleDevice.gatt.disconnect();
+  }
+}
+window.addEventListener('beforeunload', disconnectCleanly);
+window.addEventListener('pagehide', disconnectCleanly);
 
 async function sendCommand(cmd) {
   if (!rxCharacteristic) {
@@ -191,6 +231,8 @@ async function sendCommand(cmd) {
     await rxCharacteristic.writeValue(encoder.encode(cmd));
   } catch (error) {
     document.getElementById('status').innerText = 'Send failed: ' + error;
+    rxCharacteristic = null;
+    stopHeartbeat();
   }
 }
 
