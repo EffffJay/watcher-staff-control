@@ -147,17 +147,21 @@
     </div>
 
     <div class="devSection">
-      <div class="devLabel">Presets</div>
-      <div class="smallBtnRow">
-        <button class="smallBtn" onclick="sendCommand('S')">💾 Save as Default</button>
-        <button class="smallBtn" onclick="loadSavedDefault()">↩️ Load Saved</button>
+      <div class="devLabel" style="cursor:pointer;" onclick="togglePresets()">
+        <span id="presetsCarrot">▶</span> Presets
       </div>
-      <div class="smallBtnRow">
-        <button class="smallBtn danger" onclick="factoryReset()">🏭 Factory Reset</button>
-        <button class="smallBtn" onclick="exportSettings()">📋 Export Settings</button>
+      <div id="presetsBody" style="display:none;">
+        <div class="smallBtnRow">
+          <button class="smallBtn" onclick="sendCommand('S')">💾 Save as Default</button>
+          <button class="smallBtn" onclick="loadSavedDefault()">↩️ Load Saved</button>
+        </div>
+        <div class="smallBtnRow">
+          <button class="smallBtn danger" onclick="factoryReset()">🏭 Factory Reset</button>
+          <button class="smallBtn" onclick="exportSettings()">📋 Export Settings</button>
+        </div>
+        <textarea id="exportBox" readonly></textarea>
+        <div id="exportMsg"></div>
       </div>
-      <textarea id="exportBox" readonly></textarea>
-      <div id="exportMsg"></div>
     </div>
 
     <div class="devSection" id="stanceParams">
@@ -422,6 +426,14 @@ function toggleDev() {
   const btn = document.getElementById('devToggle');
   panel.classList.toggle('open');
   btn.innerText = panel.classList.contains('open') ? 'Dev Mode: On' : 'Dev Mode: Off';
+}
+
+function togglePresets() {
+  const body = document.getElementById('presetsBody');
+  const carrot = document.getElementById('presetsCarrot');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  carrot.innerText = isOpen ? '▶' : '▼';
 }
 
 function onGlobal(field, val) {
