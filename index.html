@@ -83,6 +83,39 @@
       color: #666;
       margin-bottom: 10px;
     }
+    .smallBtnRow {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .smallBtn {
+      flex: 1;
+      display: block;
+      margin: 0;
+      padding: 10px 6px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      background: #333;
+    }
+    .smallBtn.danger { background: #5a2a2a; }
+    #exportBox {
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+      background: #0c0c0c;
+      color: #8f8;
+      font-family: monospace;
+      font-size: 11px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px;
+      height: 140px;
+    }
+    #exportMsg { font-size: 12px; color: #888; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -101,11 +134,11 @@
       <div class="devLabel">Global</div>
       <div class="row">
         <label><span>Brightness</span><span id="brightVal">90</span></label>
-        <input type="range" id="brightness" min="10" max="255" value="90" oninput="onBrightness(this.value)">
+        <input type="range" id="brightness" min="10" max="255" value="90" oninput="onGlobal('brightness', this.value)">
       </div>
       <div class="row">
         <label><span>Speed</span><span id="speedVal">1.0x</span></label>
-        <input type="range" id="speed" min="10" max="300" value="100" oninput="onSpeed(this.value)">
+        <input type="range" id="speed" min="10" max="300" value="100" oninput="onGlobal('speed', this.value)">
       </div>
       <div class="row">
         <label><span>Color (applies to editing stance)</span><span></span></label>
@@ -113,41 +146,90 @@
       </div>
     </div>
 
+    <div class="devSection">
+      <div class="devLabel">Presets</div>
+      <div class="smallBtnRow">
+        <button class="smallBtn" onclick="sendCommand('S')">💾 Save as Default</button>
+        <button class="smallBtn" onclick="loadSavedDefault()">↩️ Load Saved</button>
+      </div>
+      <div class="smallBtnRow">
+        <button class="smallBtn danger" onclick="factoryReset()">🏭 Factory Reset</button>
+        <button class="smallBtn" onclick="exportSettings()">📋 Export Settings</button>
+      </div>
+      <textarea id="exportBox" readonly></textarea>
+      <div id="exportMsg"></div>
+    </div>
+
     <div class="devSection" id="stanceParams">
       <div class="devLabel">Editing: <span id="editingLabel">Calm</span></div>
-      <div class="hint">Selecting a stance button above also selects it here.</div>
+      <div class="hint">Selecting a stance button above also selects it here. "Save as Default" and "Load Saved" only work on the board and don't refresh these sliders - see the export/notes below.</div>
+
       <div id="calmParams">
         <div class="row">
-          <label><span>Closed Bias (sleepiness)</span><span id="c1Val">55</span></label>
-          <input type="range" id="c1" min="0" max="100" value="55" oninput="onParam('C1', this.value, 'c1Val')">
+          <label><span>Open Hold (ms)</span><span id="c1Val">800</span></label>
+          <input type="range" id="c1" min="0" max="3000" value="800" oninput="onCalm('openHold', this.value, 'c1Val')">
         </div>
         <div class="row">
-          <label><span>Row Fade Blend</span><span id="c2Val">28</span></label>
-          <input type="range" id="c2" min="0" max="100" value="28" oninput="onParam('C2', this.value, 'c2Val')">
+          <label><span>Closing Duration (ms)</span><span id="c2Val">700</span></label>
+          <input type="range" id="c2" min="100" max="3000" value="700" oninput="onCalm('closing', this.value, 'c2Val')">
+        </div>
+        <div class="row">
+          <label><span>Closed Hold (ms)</span><span id="c3Val">900</span></label>
+          <input type="range" id="c3" min="0" max="3000" value="900" oninput="onCalm('closedHold', this.value, 'c3Val')">
+        </div>
+        <div class="row">
+          <label><span>Opening Duration (ms)</span><span id="c4Val">700</span></label>
+          <input type="range" id="c4" min="100" max="3000" value="700" oninput="onCalm('opening', this.value, 'c4Val')">
+        </div>
+        <div class="row">
+          <label><span>Row Fade Blend</span><span id="c5Val">28</span></label>
+          <input type="range" id="c5" min="0" max="100" value="28" oninput="onCalm('blend', this.value, 'c5Val')">
+        </div>
+        <div class="row">
+          <label><span>Calm Brightness</span><span id="c6Val">255</span></label>
+          <input type="range" id="c6" min="0" max="255" value="255" oninput="onCalm('brightness', this.value, 'c6Val')">
         </div>
       </div>
+
       <div id="wrathParams" style="display:none;">
         <div class="row">
           <label><span>Center Whiteness</span><span id="w1Val">100</span></label>
-          <input type="range" id="w1" min="0" max="200" value="100" oninput="onParam('W1', this.value, 'w1Val')">
+          <input type="range" id="w1" min="0" max="200" value="100" oninput="onWrath('whiteness', this.value, 'w1Val')">
         </div>
         <div class="row">
           <label><span>Crackle Intensity (min flicker)</span><span id="w2Val">30</span></label>
-          <input type="range" id="w2" min="0" max="255" value="30" oninput="onParam('W2', this.value, 'w2Val')">
+          <input type="range" id="w2" min="0" max="255" value="30" oninput="onWrath('crackle', this.value, 'w2Val')">
+        </div>
+        <div class="row">
+          <label><span>Wrath Brightness</span><span id="w3Val">255</span></label>
+          <input type="range" id="w3" min="0" max="255" value="255" oninput="onWrath('brightness', this.value, 'w3Val')">
+        </div>
+        <div class="row">
+          <label><span>Wrath Speed</span><span id="w4Val">1.0x</span></label>
+          <input type="range" id="w4" min="10" max="300" value="100" oninput="onWrath('speed', this.value, 'w4Val')">
         </div>
       </div>
+
       <div id="divinityParams" style="display:none;">
         <div class="row">
           <label><span>Orb Radius</span><span id="d1Val">11.0</span></label>
-          <input type="range" id="d1" min="50" max="300" value="110" oninput="onOrbRadius(this.value)">
+          <input type="range" id="d1" min="50" max="300" value="110" oninput="onDivinity('radius', this.value, 'd1Val')">
         </div>
         <div class="row">
-          <label><span>Orb Speed</span><span id="d2Val">4.0</span></label>
-          <input type="range" id="d2" min="5" max="80" value="40" oninput="onOrbSpeed(this.value)">
+          <label><span>Dart Ease</span><span id="d2Val">4.0</span></label>
+          <input type="range" id="d2" min="5" max="80" value="40" oninput="onDivinity('ease', this.value, 'd2Val')">
         </div>
         <div class="row">
           <label><span>Vertical Dart Range</span><span id="d3Val">80</span></label>
-          <input type="range" id="d3" min="20" max="80" value="80" oninput="onParam('D3', this.value, 'd3Val')">
+          <input type="range" id="d3" min="20" max="80" value="80" oninput="onDivinity('vertRange', this.value, 'd3Val')">
+        </div>
+        <div class="row">
+          <label><span>Divinity Brightness</span><span id="d4Val">255</span></label>
+          <input type="range" id="d4" min="0" max="255" value="255" oninput="onDivinity('brightness', this.value, 'd4Val')">
+        </div>
+        <div class="row">
+          <label><span>Divinity Speed</span><span id="d5Val">1.0x</span></label>
+          <input type="range" id="d5" min="10" max="300" value="100" oninput="onDivinity('speed', this.value, 'd5Val')">
         </div>
       </div>
     </div>
@@ -164,8 +246,32 @@ let editingStance = 'calm';
 let lastSendTime = 0;
 let writeQueue = Promise.resolve();
 let writeFailureCount = 0;
+let pendingWrites = 0;
 const SEND_THROTTLE_MS = 120;
 const HEARTBEAT_INTERVAL_MS = 5000;
+
+// Mirrors what this page has SENT to the board (assuming writes succeed).
+// The BLE characteristic is write-only, so this is not a confirmed
+// read-back of true device state - it's a best-effort local record used
+// to keep sliders populated correctly when switching stances, and as the
+// basis for the "Export Settings" text dump. If a write silently failed,
+// this can drift from what's actually running on the board.
+let settings = {
+  global: { brightness: 90, speed: 100 },
+  calm: {
+    r: 40, g: 200, b: 220,
+    openHold: 800, closing: 700, closedHold: 900, opening: 700,
+    blend: 28, brightness: 255
+  },
+  wrath: {
+    r: 255, g: 50, b: 50,
+    whiteness: 100, crackle: 30, brightness: 255, speed: 100
+  },
+  divinity: {
+    r: 230, g: 60, b: 200,
+    radius: 110, ease: 40, vertRange: 80, brightness: 255, speed: 100
+  }
+};
 
 async function connect() {
   try {
@@ -194,9 +300,6 @@ async function connect() {
 }
 
 function onDeviceDisconnected() {
-  // Fires on a clean disconnect (board reset, out of range, etc). The
-  // heartbeat below is the backstop for when this event never fires at
-  // all, which is common on page refresh/close.
   console.warn(`[BLE] gattserverdisconnected event fired at ${new Date().toISOString()}`);
   rxCharacteristic = null;
   stopHeartbeat();
@@ -223,9 +326,6 @@ function stopHeartbeat() {
 }
 
 function disconnectCleanly() {
-  // Best-effort clean disconnect on refresh/close. Not guaranteed to run
-  // to completion (the page can be torn down mid-call), which is exactly
-  // why the board also has its own heartbeat-timeout watchdog.
   if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
     console.log('[BLE] disconnecting cleanly on unload/pagehide');
     bleDevice.gatt.disconnect();
@@ -234,8 +334,6 @@ function disconnectCleanly() {
 window.addEventListener('beforeunload', disconnectCleanly);
 window.addEventListener('pagehide', disconnectCleanly);
 
-let pendingWrites = 0;
-
 async function sendCommand(cmd) {
   if (!rxCharacteristic) {
     document.getElementById('status').innerText = 'Not connected yet - tap Connect first';
@@ -243,11 +341,6 @@ async function sendCommand(cmd) {
   }
   pendingWrites++;
   console.log(`[BLE] enqueue "${cmd}" (queue depth now ${pendingWrites})`);
-  // Chain onto a queue so writes never overlap. Web Bluetooth doesn't
-  // support concurrent GATT operations on the same device - firing writes
-  // back-to-back (e.g. while dragging a slider) commonly throws a "GATT
-  // operation already in progress" error, which used to get treated as a
-  // real disconnect and killed the connection far too eagerly.
   writeQueue = writeQueue.then(() => doWrite(cmd));
   return writeQueue;
 }
@@ -265,9 +358,6 @@ async function doWrite(cmd) {
     writeFailureCount++;
     console.warn(`[BLE] FAILED "${cmd}" after ${ms}ms (failure #${writeFailureCount}): ${error}`);
     document.getElementById('status').innerText = 'Send failed: ' + error;
-    // Only give up on the connection after repeated failures, or once the
-    // device itself confirms it's actually gone - a single transient
-    // error while dragging a slider shouldn't drop the connection.
     const stillConnected = bleDevice && bleDevice.gatt && bleDevice.gatt.connected;
     if (writeFailureCount >= 4 || !stillConnected) {
       console.warn(`[BLE] giving up on connection (failures=${writeFailureCount}, stillConnected=${stillConnected})`);
@@ -293,13 +383,38 @@ function selectStance(cmd, name) {
   document.getElementById('calmParams').style.display = name === 'calm' ? 'block' : 'none';
   document.getElementById('wrathParams').style.display = name === 'wrath' ? 'block' : 'none';
   document.getElementById('divinityParams').style.display = name === 'divinity' ? 'block' : 'none';
+  populateSlidersForStance(name);
+}
 
-  const defaults = {
-    calm: '#28c8dc',
-    wrath: '#ff3232',
-    divinity: '#e63cc8'
-  };
-  document.getElementById('colorPick').value = defaults[name];
+// Populates the visible sliders from our local `settings` record, so
+// switching stances shows what you actually last set for that stance
+// rather than resetting to a guessed default.
+function populateSlidersForStance(name) {
+  const s = settings[name];
+  const hexColor = '#' + [s.r, s.g, s.b].map(v => v.toString(16).padStart(2, '0')).join('');
+  document.getElementById('colorPick').value = hexColor;
+
+  if (name === 'calm') {
+    setSlider('c1', s.openHold); setSlider('c2', s.closing);
+    setSlider('c3', s.closedHold); setSlider('c4', s.opening);
+    setSlider('c5', s.blend); setSlider('c6', s.brightness);
+  } else if (name === 'wrath') {
+    setSlider('w1', s.whiteness); setSlider('w2', s.crackle);
+    setSlider('w3', s.brightness); setSliderSpeed('w4', s.speed);
+  } else if (name === 'divinity') {
+    setSlider('d1', s.radius); setSlider('d2', s.ease);
+    setSlider('d3', s.vertRange); setSlider('d4', s.brightness);
+    setSliderSpeed('d5', s.speed);
+  }
+}
+
+function setSlider(id, value) {
+  document.getElementById(id).value = value;
+  document.getElementById(id + 'Val').innerText = (id === 'd1' || id === 'd2') ? (value / 10).toFixed(1) : value;
+}
+function setSliderSpeed(id, value) {
+  document.getElementById(id).value = value;
+  document.getElementById(id + 'Val').innerText = (value / 100).toFixed(1) + 'x';
 }
 
 function toggleDev() {
@@ -309,36 +424,89 @@ function toggleDev() {
   btn.innerText = panel.classList.contains('open') ? 'Dev Mode: On' : 'Dev Mode: Off';
 }
 
-function onBrightness(val) {
-  document.getElementById('brightVal').innerText = val;
-  throttledSend('B' + val);
-}
-
-function onSpeed(val) {
-  document.getElementById('speedVal').innerText = (val / 100).toFixed(1) + 'x';
-  throttledSend('P' + val);
+function onGlobal(field, val) {
+  settings.global[field] = Number(val);
+  if (field === 'brightness') {
+    document.getElementById('brightVal').innerText = val;
+    throttledSend('B' + val);
+  } else if (field === 'speed') {
+    document.getElementById('speedVal').innerText = (val / 100).toFixed(1) + 'x';
+    throttledSend('P' + val);
+  }
 }
 
 function onColor(hex) {
   const r = parseInt(hex.substring(1, 3), 16);
   const g = parseInt(hex.substring(3, 5), 16);
   const b = parseInt(hex.substring(5, 7), 16);
+  settings[editingStance].r = r;
+  settings[editingStance].g = g;
+  settings[editingStance].b = b;
   throttledSend('R' + r + ',' + g + ',' + b);
 }
 
-function onParam(prefix, val, labelId) {
+function onCalm(field, val, labelId) {
+  settings.calm[field] = Number(val);
+  const prefixByField = { openHold: 'C1', closing: 'C2', closedHold: 'C3', opening: 'C4', blend: 'C5', brightness: 'C6' };
   document.getElementById(labelId).innerText = val;
-  throttledSend(prefix + val);
+  throttledSend(prefixByField[field] + val);
 }
 
-function onOrbRadius(val) {
-  document.getElementById('d1Val').innerText = (val / 10).toFixed(1);
-  throttledSend('D1' + val);
+function onWrath(field, val, labelId) {
+  settings.wrath[field] = Number(val);
+  if (field === 'speed') {
+    document.getElementById(labelId).innerText = (val / 100).toFixed(1) + 'x';
+    throttledSend('W4' + val);
+    return;
+  }
+  const prefixByField = { whiteness: 'W1', crackle: 'W2', brightness: 'W3' };
+  document.getElementById(labelId).innerText = val;
+  throttledSend(prefixByField[field] + val);
 }
 
-function onOrbSpeed(val) {
-  document.getElementById('d2Val').innerText = (val / 10).toFixed(1);
-  throttledSend('D2' + val);
+function onDivinity(field, val, labelId) {
+  settings.divinity[field] = Number(val);
+  if (field === 'radius' || field === 'ease') {
+    document.getElementById(labelId).innerText = (val / 10).toFixed(1);
+  } else if (field === 'speed') {
+    document.getElementById(labelId).innerText = (val / 100).toFixed(1) + 'x';
+  } else {
+    document.getElementById(labelId).innerText = val;
+  }
+  const prefixByField = { radius: 'D1', ease: 'D2', vertRange: 'D3', brightness: 'D4', speed: 'D5' };
+  throttledSend(prefixByField[field] + val);
+}
+
+// ---------- Presets ----------
+function loadSavedDefault() {
+  sendCommand('L');
+  document.getElementById('exportMsg').innerText =
+    'Sent "load saved default" - the board has reverted, but these sliders can\'t auto-refresh (write-only connection). Reconnect or manually re-sync if you need the UI to match.';
+}
+
+function factoryReset() {
+  if (!confirm('Reset the board to its original factory defaults? This does not affect anything already saved with "Save as Default".')) return;
+  sendCommand('F');
+  document.getElementById('exportMsg').innerText =
+    'Sent "factory reset" - the board has reverted, but these sliders can\'t auto-refresh (write-only connection).';
+}
+
+function exportSettings() {
+  const json = JSON.stringify(settings, null, 2);
+  const box = document.getElementById('exportBox');
+  box.value = json;
+  box.style.display = 'block';
+  box.focus();
+  box.select();
+
+  const msg = document.getElementById('exportMsg');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(json)
+      .then(() => { msg.innerText = 'Copied to clipboard. This reflects what this page has sent - if any writes failed, it may not exactly match the board.'; })
+      .catch(() => { msg.innerText = 'Could not auto-copy - text is selected above, copy manually.'; });
+  } else {
+    msg.innerText = 'Text is selected above - copy manually.';
+  }
 }
 </script>
 </body>
