@@ -241,16 +241,16 @@
 
       <div id="regentParams" style="display:none;">
         <div class="row">
-          <label><span>Rest Brightness</span><span id="g1Val">70</span></label>
-          <input type="range" id="g1" min="0" max="255" value="70" oninput="onRegent('restBrightness', this.value, 'g1Val')">
+          <label><span>Rest Brightness</span><span id="g1Val">150</span></label>
+          <input type="range" id="g1" min="0" max="255" value="150" oninput="onRegent('restBrightness', this.value, 'g1Val')">
         </div>
         <div class="row">
           <label><span>Sliver Brightness</span><span id="g2Val">230</span></label>
           <input type="range" id="g2" min="0" max="255" value="230" oninput="onRegent('sliverBrightness', this.value, 'g2Val')">
         </div>
         <div class="row">
-          <label><span>Gather Window (ms)</span><span id="g3Val">1200</span></label>
-          <input type="range" id="g3" min="200" max="4000" value="1200" oninput="onRegent('gather', this.value, 'g3Val')">
+          <label><span>Gather Window (ms)</span><span id="g3Val">2400</span></label>
+          <input type="range" id="g3" min="200" max="4000" value="2400" oninput="onRegent('gather', this.value, 'g3Val')">
         </div>
         <div class="row">
           <label><span>Hold Duration (ms)</span><span id="g4Val">300</span></label>
@@ -261,8 +261,8 @@
           <input type="range" id="g5" min="100" max="1500" value="350" oninput="onRegent('release', this.value, 'g5Val')">
         </div>
         <div class="row">
-          <label><span>Recover Duration (ms)</span><span id="g6Val">500</span></label>
-          <input type="range" id="g6" min="0" max="3000" value="500" oninput="onRegent('recover', this.value, 'g6Val')">
+          <label><span>Recover Duration (ms)</span><span id="g6Val">1400</span></label>
+          <input type="range" id="g6" min="0" max="4000" value="1400" oninput="onRegent('recover', this.value, 'g6Val')">
         </div>
         <div class="row">
           <label><span>Regent Brightness</span><span id="g7Val">255</span></label>
@@ -314,8 +314,8 @@ let settings = {
   },
   regent: {
     r: 220, g: 110, b: 20,
-    restBrightness: 70, sliverBrightness: 230,
-    gather: 1200, hold: 300, release: 350, recover: 500,
+    restBrightness: 150, sliverBrightness: 230,
+    gather: 2400, hold: 300, release: 350, recover: 1400,
     brightness: 255, speed: 100
   }
 };
