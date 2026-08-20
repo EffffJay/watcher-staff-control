@@ -135,12 +135,12 @@
     <div class="devSection">
       <div class="devLabel">Global</div>
       <div class="row">
-        <label><span>Brightness</span><span id="brightVal">119</span></label>
-        <input type="range" id="brightness" min="10" max="255" value="119" oninput="onGlobal('brightness', this.value)">
+        <label><span>Brightness</span><span id="brightVal">255</span></label>
+        <input type="range" id="brightness" min="10" max="255" value="255" oninput="onGlobal('brightness', this.value)">
       </div>
       <div class="row">
         <label><span>Speed</span><span id="speedVal">1.0x</span></label>
-        <input type="range" id="speed" min="10" max="300" value="100" oninput="onGlobal('speed', this.value)">
+        <input type="range" id="speed" min="10" max="300" value="98" oninput="onGlobal('speed', this.value)">
       </div>
       <div class="row">
         <label><span>Color (applies to editing stance)</span><span></span></label>
@@ -172,24 +172,24 @@
 
       <div id="calmParams">
         <div class="row">
-          <label><span>Open Hold (ms)</span><span id="c1Val">2205</span></label>
-          <input type="range" id="c1" min="0" max="3000" value="2205" oninput="onCalm('openHold', this.value, 'c1Val')">
+          <label><span>Open Hold (ms)</span><span id="c1Val">0</span></label>
+          <input type="range" id="c1" min="0" max="3000" value="0" oninput="onCalm('openHold', this.value, 'c1Val')">
         </div>
         <div class="row">
-          <label><span>Closing Duration (ms)</span><span id="c2Val">1487</span></label>
-          <input type="range" id="c2" min="100" max="3000" value="1487" oninput="onCalm('closing', this.value, 'c2Val')">
+          <label><span>Closing Duration (ms)</span><span id="c2Val">1640</span></label>
+          <input type="range" id="c2" min="100" max="3000" value="1640" oninput="onCalm('closing', this.value, 'c2Val')">
         </div>
         <div class="row">
-          <label><span>Closed Hold (ms)</span><span id="c3Val">621</span></label>
-          <input type="range" id="c3" min="0" max="3000" value="621" oninput="onCalm('closedHold', this.value, 'c3Val')">
+          <label><span>Closed Hold (ms)</span><span id="c3Val">212</span></label>
+          <input type="range" id="c3" min="0" max="3000" value="212" oninput="onCalm('closedHold', this.value, 'c3Val')">
         </div>
         <div class="row">
-          <label><span>Opening Duration (ms)</span><span id="c4Val">1557</span></label>
-          <input type="range" id="c4" min="100" max="3000" value="1557" oninput="onCalm('opening', this.value, 'c4Val')">
+          <label><span>Opening Duration (ms)</span><span id="c4Val">2277</span></label>
+          <input type="range" id="c4" min="100" max="3000" value="2277" oninput="onCalm('opening', this.value, 'c4Val')">
         </div>
         <div class="row">
-          <label><span>Row Fade Blend</span><span id="c5Val">28</span></label>
-          <input type="range" id="c5" min="0" max="100" value="28" oninput="onCalm('blend', this.value, 'c5Val')">
+          <label><span>Row Fade Blend</span><span id="c5Val">61</span></label>
+          <input type="range" id="c5" min="0" max="100" value="61" oninput="onCalm('blend', this.value, 'c5Val')">
         </div>
         <div class="row">
           <label><span>Calm Brightness</span><span id="c6Val">255</span></label>
@@ -199,20 +199,20 @@
 
       <div id="wrathParams" style="display:none;">
         <div class="row">
-          <label><span>Center Whiteness</span><span id="w1Val">100</span></label>
-          <input type="range" id="w1" min="0" max="200" value="100" oninput="onWrath('whiteness', this.value, 'w1Val')">
+          <label><span>Center Whiteness</span><span id="w1Val">41</span></label>
+          <input type="range" id="w1" min="0" max="200" value="41" oninput="onWrath('whiteness', this.value, 'w1Val')">
         </div>
         <div class="row">
-          <label><span>Crackle Intensity (min flicker)</span><span id="w2Val">88</span></label>
-          <input type="range" id="w2" min="0" max="255" value="88" oninput="onWrath('crackle', this.value, 'w2Val')">
+          <label><span>Crackle Intensity (min flicker)</span><span id="w2Val">120</span></label>
+          <input type="range" id="w2" min="0" max="255" value="120" oninput="onWrath('crackle', this.value, 'w2Val')">
         </div>
         <div class="row">
-          <label><span>Wrath Brightness</span><span id="w3Val">206</span></label>
-          <input type="range" id="w3" min="0" max="255" value="206" oninput="onWrath('brightness', this.value, 'w3Val')">
+          <label><span>Wrath Brightness</span><span id="w3Val">175</span></label>
+          <input type="range" id="w3" min="0" max="255" value="175" oninput="onWrath('brightness', this.value, 'w3Val')">
         </div>
         <div class="row">
-          <label><span>Wrath Speed</span><span id="w4Val">0.3x</span></label>
-          <input type="range" id="w4" min="10" max="300" value="30" oninput="onWrath('speed', this.value, 'w4Val')">
+          <label><span>Wrath Speed</span><span id="w4Val">0.7x</span></label>
+          <input type="range" id="w4" min="10" max="300" value="71" oninput="onWrath('speed', this.value, 'w4Val')">
         </div>
       </div>
 
@@ -222,8 +222,8 @@
           <input type="range" id="d1" min="50" max="300" value="91" oninput="onDivinity('radius', this.value, 'd1Val')">
         </div>
         <div class="row">
-          <label><span>Dart Ease</span><span id="d2Val">3.2</span></label>
-          <input type="range" id="d2" min="5" max="80" value="32" oninput="onDivinity('ease', this.value, 'd2Val')">
+          <label><span>Dart Ease</span><span id="d2Val">3.3</span></label>
+          <input type="range" id="d2" min="5" max="80" value="33" oninput="onDivinity('ease', this.value, 'd2Val')">
         </div>
         <div class="row">
           <label><span>Vertical Dart Range</span><span id="d3Val">80</span></label>
@@ -234,43 +234,43 @@
           <input type="range" id="d4" min="0" max="255" value="255" oninput="onDivinity('brightness', this.value, 'd4Val')">
         </div>
         <div class="row">
-          <label><span>Divinity Speed</span><span id="d5Val">0.6x</span></label>
-          <input type="range" id="d5" min="10" max="300" value="59" oninput="onDivinity('speed', this.value, 'd5Val')">
+          <label><span>Divinity Speed</span><span id="d5Val">0.5x</span></label>
+          <input type="range" id="d5" min="10" max="300" value="48" oninput="onDivinity('speed', this.value, 'd5Val')">
         </div>
       </div>
 
       <div id="regentParams" style="display:none;">
         <div class="row">
-          <label><span>Rest Brightness</span><span id="g1Val">150</span></label>
-          <input type="range" id="g1" min="0" max="255" value="150" oninput="onRegent('restBrightness', this.value, 'g1Val')">
+          <label><span>Rest Brightness</span><span id="g1Val">255</span></label>
+          <input type="range" id="g1" min="0" max="255" value="255" oninput="onRegent('restBrightness', this.value, 'g1Val')">
         </div>
         <div class="row">
-          <label><span>Sliver Brightness</span><span id="g2Val">230</span></label>
-          <input type="range" id="g2" min="0" max="255" value="230" oninput="onRegent('sliverBrightness', this.value, 'g2Val')">
+          <label><span>Sliver Brightness</span><span id="g2Val">236</span></label>
+          <input type="range" id="g2" min="0" max="255" value="236" oninput="onRegent('sliverBrightness', this.value, 'g2Val')">
         </div>
         <div class="row">
-          <label><span>Gather Window (ms)</span><span id="g3Val">2400</span></label>
-          <input type="range" id="g3" min="200" max="4000" value="2400" oninput="onRegent('gather', this.value, 'g3Val')">
+          <label><span>Gather Window (ms)</span><span id="g3Val">2019</span></label>
+          <input type="range" id="g3" min="200" max="4000" value="2019" oninput="onRegent('gather', this.value, 'g3Val')">
         </div>
         <div class="row">
-          <label><span>Hold Duration (ms)</span><span id="g4Val">300</span></label>
-          <input type="range" id="g4" min="0" max="2000" value="300" oninput="onRegent('hold', this.value, 'g4Val')">
+          <label><span>Hold Duration (ms)</span><span id="g4Val">909</span></label>
+          <input type="range" id="g4" min="0" max="2000" value="909" oninput="onRegent('hold', this.value, 'g4Val')">
         </div>
         <div class="row">
-          <label><span>Release Duration (ms)</span><span id="g5Val">350</span></label>
-          <input type="range" id="g5" min="100" max="1500" value="350" oninput="onRegent('release', this.value, 'g5Val')">
+          <label><span>Release Duration (ms)</span><span id="g5Val">588</span></label>
+          <input type="range" id="g5" min="100" max="1500" value="588" oninput="onRegent('release', this.value, 'g5Val')">
         </div>
         <div class="row">
-          <label><span>Recover Duration (ms)</span><span id="g6Val">1400</span></label>
-          <input type="range" id="g6" min="0" max="4000" value="1400" oninput="onRegent('recover', this.value, 'g6Val')">
+          <label><span>Recover Duration (ms)</span><span id="g6Val">2616</span></label>
+          <input type="range" id="g6" min="0" max="4000" value="2616" oninput="onRegent('recover', this.value, 'g6Val')">
         </div>
         <div class="row">
           <label><span>Regent Brightness</span><span id="g7Val">255</span></label>
           <input type="range" id="g7" min="0" max="255" value="255" oninput="onRegent('brightness', this.value, 'g7Val')">
         </div>
         <div class="row">
-          <label><span>Regent Speed</span><span id="g8Val">1.0x</span></label>
-          <input type="range" id="g8" min="10" max="300" value="100" oninput="onRegent('speed', this.value, 'g8Val')">
+          <label><span>Regent Speed</span><span id="g8Val">0.6x</span></label>
+          <input type="range" id="g8" min="10" max="300" value="63" oninput="onRegent('speed', this.value, 'g8Val')">
         </div>
       </div>
     </div>
@@ -298,25 +298,25 @@ const HEARTBEAT_INTERVAL_MS = 5000;
 // basis for the "Export Settings" text dump. If a write silently failed,
 // this can drift from what's actually running on the board.
 let settings = {
-  global: { brightness: 119, speed: 100 },
+  global: { brightness: 255, speed: 98 },
   calm: {
     r: 40, g: 200, b: 220,
-    openHold: 2205, closing: 1487, closedHold: 621, opening: 1557,
-    blend: 28, brightness: 255
+    openHold: 0, closing: 1640, closedHold: 212, opening: 2277,
+    blend: 61, brightness: 255
   },
   wrath: {
-    r: 255, g: 50, b: 50,
-    whiteness: 100, crackle: 88, brightness: 206, speed: 30
+    r: 201, g: 0, b: 0,
+    whiteness: 41, crackle: 120, brightness: 175, speed: 71
   },
   divinity: {
     r: 230, g: 60, b: 200,
-    radius: 91, ease: 32, vertRange: 80, brightness: 255, speed: 59
+    radius: 91, ease: 33, vertRange: 80, brightness: 255, speed: 48
   },
   regent: {
     r: 220, g: 110, b: 20,
-    restBrightness: 150, sliverBrightness: 230,
-    gather: 2400, hold: 300, release: 350, recover: 1400,
-    brightness: 255, speed: 100
+    restBrightness: 255, sliverBrightness: 236,
+    gather: 2019, hold: 909, release: 588, recover: 2616,
+    brightness: 255, speed: 63
   }
 };
 
