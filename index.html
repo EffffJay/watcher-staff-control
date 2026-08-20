@@ -27,6 +27,7 @@
     #calmBtn { background: #2a7fd6; }
     #wrathBtn { background: #c62828; }
     #divinityBtn { background: #9700CF; }
+    #regentBtn { background: #cc7a10; }
     #offBtn { background: #555; }
     #status { margin-top: 14px; color: #aaa; font-size: 14px; }
 
@@ -124,6 +125,7 @@
   <button id="calmBtn" onclick="selectStance('1','calm')">Calm</button>
   <button id="wrathBtn" onclick="selectStance('2','wrath')">Wrath</button>
   <button id="divinityBtn" onclick="selectStance('3','divinity')">Divinity</button>
+  <button id="regentBtn" onclick="selectStance('4','regent')">Regent</button>
   <button id="offBtn" onclick="sendCommand('0')">Off</button>
   <div id="status">Not connected</div>
 
@@ -236,6 +238,41 @@
           <input type="range" id="d5" min="10" max="300" value="59" oninput="onDivinity('speed', this.value, 'd5Val')">
         </div>
       </div>
+
+      <div id="regentParams" style="display:none;">
+        <div class="row">
+          <label><span>Rest Brightness</span><span id="g1Val">70</span></label>
+          <input type="range" id="g1" min="0" max="255" value="70" oninput="onRegent('restBrightness', this.value, 'g1Val')">
+        </div>
+        <div class="row">
+          <label><span>Sliver Brightness</span><span id="g2Val">230</span></label>
+          <input type="range" id="g2" min="0" max="255" value="230" oninput="onRegent('sliverBrightness', this.value, 'g2Val')">
+        </div>
+        <div class="row">
+          <label><span>Gather Window (ms)</span><span id="g3Val">1200</span></label>
+          <input type="range" id="g3" min="200" max="4000" value="1200" oninput="onRegent('gather', this.value, 'g3Val')">
+        </div>
+        <div class="row">
+          <label><span>Hold Duration (ms)</span><span id="g4Val">300</span></label>
+          <input type="range" id="g4" min="0" max="2000" value="300" oninput="onRegent('hold', this.value, 'g4Val')">
+        </div>
+        <div class="row">
+          <label><span>Release Duration (ms)</span><span id="g5Val">350</span></label>
+          <input type="range" id="g5" min="100" max="1500" value="350" oninput="onRegent('release', this.value, 'g5Val')">
+        </div>
+        <div class="row">
+          <label><span>Recover Duration (ms)</span><span id="g6Val">500</span></label>
+          <input type="range" id="g6" min="0" max="3000" value="500" oninput="onRegent('recover', this.value, 'g6Val')">
+        </div>
+        <div class="row">
+          <label><span>Regent Brightness</span><span id="g7Val">255</span></label>
+          <input type="range" id="g7" min="0" max="255" value="255" oninput="onRegent('brightness', this.value, 'g7Val')">
+        </div>
+        <div class="row">
+          <label><span>Regent Speed</span><span id="g8Val">1.0x</span></label>
+          <input type="range" id="g8" min="10" max="300" value="100" oninput="onRegent('speed', this.value, 'g8Val')">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -274,6 +311,12 @@ let settings = {
   divinity: {
     r: 230, g: 60, b: 200,
     radius: 91, ease: 32, vertRange: 80, brightness: 255, speed: 59
+  },
+  regent: {
+    r: 220, g: 110, b: 20,
+    restBrightness: 70, sliverBrightness: 230,
+    gather: 1200, hold: 300, release: 350, recover: 500,
+    brightness: 255, speed: 100
   }
 };
 
@@ -387,6 +430,7 @@ function selectStance(cmd, name) {
   document.getElementById('calmParams').style.display = name === 'calm' ? 'block' : 'none';
   document.getElementById('wrathParams').style.display = name === 'wrath' ? 'block' : 'none';
   document.getElementById('divinityParams').style.display = name === 'divinity' ? 'block' : 'none';
+  document.getElementById('regentParams').style.display = name === 'regent' ? 'block' : 'none';
   populateSlidersForStance(name);
 }
 
@@ -409,6 +453,11 @@ function populateSlidersForStance(name) {
     setSlider('d1', s.radius); setSlider('d2', s.ease);
     setSlider('d3', s.vertRange); setSlider('d4', s.brightness);
     setSliderSpeed('d5', s.speed);
+  } else if (name === 'regent') {
+    setSlider('g1', s.restBrightness); setSlider('g2', s.sliverBrightness);
+    setSlider('g3', s.gather); setSlider('g4', s.hold);
+    setSlider('g5', s.release); setSlider('g6', s.recover);
+    setSlider('g7', s.brightness); setSliderSpeed('g8', s.speed);
   }
 }
 
@@ -486,6 +535,18 @@ function onDivinity(field, val, labelId) {
     document.getElementById(labelId).innerText = val;
   }
   const prefixByField = { radius: 'D1', ease: 'D2', vertRange: 'D3', brightness: 'D4', speed: 'D5' };
+  throttledSend(prefixByField[field] + val);
+}
+
+function onRegent(field, val, labelId) {
+  settings.regent[field] = Number(val);
+  if (field === 'speed') {
+    document.getElementById(labelId).innerText = (val / 100).toFixed(1) + 'x';
+    throttledSend('G8' + val);
+    return;
+  }
+  document.getElementById(labelId).innerText = val;
+  const prefixByField = { restBrightness: 'G1', sliverBrightness: 'G2', gather: 'G3', hold: 'G4', release: 'G5', recover: 'G6', brightness: 'G7' };
   throttledSend(prefixByField[field] + val);
 }
 
